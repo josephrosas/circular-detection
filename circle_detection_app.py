@@ -155,9 +155,9 @@ def main():
     show_file = st.empty()
 
     if not file:
-    show_file.info('Please upload a file of type: '
-                   + ', '.join(file_types))
-    return
+        show_file.info('Please upload a file of type: '
+                       + ', '.join(file_types))
+        return
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
