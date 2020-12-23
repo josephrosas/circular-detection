@@ -1,4 +1,5 @@
 # Making the necessary imports
+import cv2
 import numpy as np
 import streamlit as st
 
