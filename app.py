@@ -1,7 +1,7 @@
 # Making the necessary imports
 
 """
-App serves the purpose of detecting small filaments.
+Detect circular-shaped objects from images
 
 """
 
@@ -12,6 +12,14 @@ import numpy as np
 import streamlit as st
 
 from PIL import Image
+
+STYLE = """
+<style>
+img {
+    max-width: 100%;
+}
+</style>
+"""
 
 st.title("First Streamlit Web Application")
 st.markdown("This simple web application renders the uploaded images into grayscale mode.")
