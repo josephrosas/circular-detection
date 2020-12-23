@@ -22,7 +22,7 @@ def sharpen_img(image,
         np.copyto(sharpened, image, where=low_contrast_mask)
     return sharpened
 
-st.title("Detect Testing Circular-Shaped Objects")
+st.title("Detect Testing app Circular-Shaped Objects")
 st.markdown("This simple web application detects circular-shaped objects from uploaded images.")
 
 st.sidebar.title("Image Adjustments")
