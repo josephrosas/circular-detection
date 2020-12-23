@@ -1,4 +1,10 @@
 # Making the necessary imports
+
+"""
+App serves the purpose of detecting small filaments.
+
+"""
+
 import cv2
 import math
 import statistics
