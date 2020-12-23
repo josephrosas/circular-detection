@@ -104,6 +104,11 @@ def main():
     maxRadius_input = int(radius_input[1])
 
 
+    #if st.sidebar.button("Show Options"):
+    #    st.text("Button 1 pressed")
+    #if st.sidebar.button("Hide Options"):
+    #    st.text("Button 2 pressed")
+
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
     image = cv2.imdecode(file_bytes, 1)
