@@ -10,14 +10,6 @@ from PIL import Image
 st.title("Detect Circular-Shaped Objects")
 st.markdown("This simple web application detects circular-shaped objects from uploaded images.")
 
-STYLE = """
-<style>
-img {
-    max-width: 100%;
-}
-</style>
-"""
-
 st.sidebar.title("Image Adjustments")
 st.sidebar.markdown("Perform any necessary adjustments to images for more clarity.")
 
