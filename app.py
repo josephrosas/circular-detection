@@ -19,4 +19,4 @@ if uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()),dtype=np.uint8)
     image = cv2.imdecode(file_bytes, 1)
     st.subheader("Grayscale Image")
-    st.image(image=cv2.cvtColor(image,cv2.COLOR_RGB2GRAY),width=600)
+    st.image(image=cv2.cvtColor(image,cv2.COLOR_RGB2GRAY),width=700)
