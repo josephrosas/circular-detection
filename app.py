@@ -148,7 +148,7 @@ def main():
     min_circle_size = min(circle_radius)  # Smallest Circle
     max_circle_size = max(circle_radius)  # Biggest Circle
 
-    stdv_places = .5 # Standard Deviations Away From Average
+    stdv_places = 2 # Standard Deviations Away From Average
 
     stdv = (avg_radius - (stdv_places * standard_deviation))
     
