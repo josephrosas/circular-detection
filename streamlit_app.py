@@ -139,7 +139,7 @@ def main():
 
     minRadius_input = int(radius_input[0])
     maxRadius_input = int(radius_input[1])
-    visible_list = st.sidebar.radio('Visible', [1,2,3])
+    visible_list = st.sidebar.radio('Show Circle Outlines', ["True", "False"])
 
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
