@@ -79,10 +79,7 @@ file_types = ["JPG","JPEG","PNG"]
 def main():
 
     # Image Uploader
-    file = st.sidebar.file_uploader("Upload file", 
-                                    type=file_types, 
-                                    key="1"
-                                 )
+    file = st.sidebar.file_uploader("Upload file", type=file_types, key="1")
 
     show_file = st.empty()
 
@@ -98,7 +95,7 @@ def main():
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
-    thresh_input = st.sidebar.number_input(label='Accumulator Resolution', 
+    thresh_input = st.sidebar.number_input(label='Threshold Value', 
                                         min_value=.00, 
                                         max_value=1.00, 
                                         step=0.01, 
@@ -108,7 +105,6 @@ def main():
     # Model Tuning
     dp_list = list(np.arange(.025, 5, .01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
-
     dp1_input = st.sidebar.number_input(label='Accumulator Resolution', 
                                         min_value=.05, 
                                         max_value=5.0, 
@@ -141,7 +137,6 @@ def main():
     maxRadius_input = int(radius_input[1])
     visible_list = st.sidebar.radio('Show Circle Outlines', ["True", "False"])
 
-
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
     original_image = cv2.imdecode(file_bytes, 1)
@@ -156,9 +151,7 @@ def main():
     st.plotly_chart(fig)
 
     # Image Adjustments 
-    
     image = original_image.copy()
-    
     image = sharpen_img(image, amount=sharpen_input)
     gamma = apply_gamma(image, amount=gamma_input) 
     
@@ -178,9 +171,6 @@ def main():
     circle_radius = circles[0, :, 2]  # Extract Radius Per Circle
     circle_count = len(circle_radius)  # Count Detected Circles
 
-    #min_circle_size = round(min(circle_radius))  # Smallest Circle
-    #max_circle_size = round(max(circle_radius))  # Biggest Circle
-
     avg_radius = (sum(circle_radius) / circle_count)  # Overall radius mean
 
     standard_deviation = statistics.stdev(circle_radius, avg_radius)
@@ -199,11 +189,7 @@ def main():
     small_circles = len([i for i in circle_radius if i < min_threshold])
     big_circles = len([i for i in circle_radius if i > max_threshold])
 
-    #cimg = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-    #cimg = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
-
     shape_size = 10
-    
     for (x, y, r) in circles[0, :]:
         x = round(x)#.astype(int)
         y = round(y)#.astype(int)
