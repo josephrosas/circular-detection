@@ -13,16 +13,16 @@ def sharpen_img(image,
                 sigma=1.0,
                 amount=1.0,
                 threshold=0):
-    """Return a sharpened version of the image, using an unsharp mask."""
-    blurred = cv2.GaussianBlur(image, kernel_size, sigma)
-    sharpened = float(amount + 1) * image - float(amount) * blurred
-    sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
-    sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
-    sharpened = sharpened.round().astype(np.uint8)
-    if threshold > 0:
-        low_contrast_mask = np.absolute(image - blurred) < threshold
-        np.copyto(sharpened, image, where=low_contrast_mask)
-    return sharpened
+  """Return a sharpened version of the image, using an unsharp mask."""
+  blurred = cv2.GaussianBlur(image, kernel_size, sigma)
+  sharpened = float(amount + 1) * image - float(amount) * blurred
+  sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
+  sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
+  sharpened = sharpened.round().astype(np.uint8)
+  if threshold > 0:
+      low_contrast_mask = np.absolute(image - blurred) < threshold
+      np.copyto(sharpened, image, where=low_contrast_mask)
+  return sharpened
   
 def adjust_gamma(image, gamma=1.0):
   # build a lookup table mapping the pixel values [0, 255] to
@@ -44,7 +44,6 @@ def apply_gamma(image, amount=1.5):
         adjusted = adjust_gamma(image, gamma=gamma)
         cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-
     return adjusted
   
 def gamma_threshold(image, value=0.25):
@@ -56,9 +55,7 @@ def gamma_threshold(image, value=0.25):
   return image
 
 def get_circles(img, dp1, p1, p2, minr, maxr):
-
     rows = img.shape[0]
-
     circles = cv2.HoughCircles(
         image=img,
         method=cv2.HOUGH_GRADIENT,
@@ -68,7 +65,6 @@ def get_circles(img, dp1, p1, p2, minr, maxr):
         param2=p2,
         minRadius=minr,
         maxRadius=maxr)
-
     return circles
 
 # Sidebar Headers
@@ -99,13 +95,13 @@ def main():
     # Filter Tools
     sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 3)
     
-    dp_list = list(np.arange(.025, 5, .01))
+    dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
 
     thresh_input = st.sidebar.number_input(label='Accumulator Resolution', 
-                                        min_value=.0, 
-                                        max_value=1.0, 
-                                        step=0.01, 
+                                        min_value=.00, 
+                                        max_value=1.00, 
+                                        step=0..01, 
                                         value=0.30
                                     )
 
@@ -144,11 +140,6 @@ def main():
     #minRadius_input = int(radius_input[0])
     #maxRadius_input = int(radius_input[1])
 
-
-    #if st.sidebar.button("Show Options"):
-    #    st.text("Button 1 pressed")
-    #if st.sidebar.button("Hide Options"):
-    #    st.text("Button 2 pressed")
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
