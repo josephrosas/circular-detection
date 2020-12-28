@@ -160,7 +160,7 @@ def main():
     gamma = apply_gamma(image, amount=5)
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
-    gray = gamma_threshold(gray, value=0.30)
+    gray = gamma_threshold(gray, value=0.20)
 
     # Circle Detecting Parameters
     circles = get_circles(gray,
