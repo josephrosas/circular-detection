@@ -98,7 +98,6 @@ def main():
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
-
     thresh_input = st.sidebar.number_input(label='Accumulator Resolution', 
                                         min_value=.00, 
                                         max_value=1.00, 
@@ -144,9 +143,9 @@ def main():
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
-    image = cv2.imdecode(file_bytes, 1)
+    original_image = cv2.imdecode(file_bytes, 1)
 
-    fig = px.imshow(image)
+    fig = px.imshow(original_image)
     fig.update_layout(title='Uploaded Image', autosize=False, 
                       width=650,
                       height=500,
@@ -156,14 +155,15 @@ def main():
     st.plotly_chart(fig)
 
     # Image Adjustments 
+    
+    image = original_image.copy()
+    
     image = sharpen_img(image, amount=sharpen_input)
     gamma = apply_gamma(image, amount=gamma_input) 
     
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
     thresh = gamma_threshold(gray, value=thresh_input)
-    
-    
 
     # Circle Detecting Parameters
     circles = get_circles(thresh,
@@ -198,8 +198,8 @@ def main():
     small_circles = len([i for i in circle_radius if i < min_threshold])
     big_circles = len([i for i in circle_radius if i > max_threshold])
 
-    cimg = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-    cimg = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
+    #cimg = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    #cimg = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
 
     shape_size = 10
 
@@ -210,17 +210,17 @@ def main():
         
         # Mark the center of the circle
         if r <= min_threshold:
-            cv2.rectangle(cimg, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
+            cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
         
         # Mark circle outlines
-        cv2.circle(cimg, (x, y), int(r), (0, 255, 0), 1)
+        cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 1)
         
         # Show overall metric summary 
-        cv2.putText(cimg, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
-        cv2.putText(cimg, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+        cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+        cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
 
 
-    fig = px.imshow(cimg)
+    fig = px.imshow(original_image)
     fig.update_layout(title='Outcome Image', autosize=False, 
                       width=650,
                       height=500,
