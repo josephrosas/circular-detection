@@ -94,6 +94,7 @@ def main():
 
     # Filter Tools
     sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 3)
+    gamma_input = st.sidebar.number_input('Gamma Value', 0, 15, 2)
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
@@ -156,7 +157,7 @@ def main():
 
     # Image Adjustments 
     image = sharpen_img(image, amount=sharpen_input)
-    gamma = apply_gamma(image, amount=2) 
+    gamma = apply_gamma(image, amount=gamma_input) 
     
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
