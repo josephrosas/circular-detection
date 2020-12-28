@@ -160,7 +160,7 @@ def main():
     
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
-    thresh = gamma_threshold(gray, value=.30)
+    thresh = gamma_threshold(gray, value=.40)
     
     
 
