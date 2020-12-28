@@ -93,8 +93,8 @@ def main():
 
 
     # Filter Tools
-    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 3)
-    gamma_input = st.sidebar.number_input('Gamma Value', 0, 15, 2)
+    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 4)
+    gamma_input = st.sidebar.number_input('Gamma Value', 0, 15, 5)
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
@@ -102,7 +102,7 @@ def main():
                                         min_value=.00, 
                                         max_value=1.00, 
                                         step=0.01, 
-                                        value=0.30
+                                        value=0.10
                                     )
 
     # Model Tuning
@@ -120,14 +120,14 @@ def main():
                                         min_value=1, 
                                         max_value=1000, 
                                         step=25, 
-                                        value=400
+                                        value=450
                                     )
 
     p2_input = st.sidebar.number_input(label='Circle Detection Threshold', 
                                         min_value=0, 
                                         max_value=20, 
                                         step=1, 
-                                        value=10
+                                        value=8
                                     )
 
     radius_input = st.sidebar.slider(label='Min - Max Radius', 
