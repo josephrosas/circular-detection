@@ -213,7 +213,7 @@ def main():
             cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
         
         # Mark circle outlines
-        cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 1)
+        cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
         
         # Show overall metric summary 
         cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
