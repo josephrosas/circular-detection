@@ -90,12 +90,12 @@ def main():
 
 
     # Filter Tools
-    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 4)
-    gamma_input = st.sidebar.number_input('Gamma Value', 0, 15, 5)
+    sharpen_input = st.sidebar.number_input('Sharpen', 0, 15, 4)
+    gamma_input = st.sidebar.number_input('Brightness', 0, 15, 5)
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
     dp_list = [ '%.2f' % elem for elem in dp_list ]
-    thresh_input = st.sidebar.number_input(label='Threshold Value', 
+    thresh_input = st.sidebar.number_input(label='Denoising', 
                                         min_value=.00, 
                                         max_value=1.00, 
                                         step=0.01, 
@@ -135,6 +135,7 @@ def main():
 
     minRadius_input = int(radius_input[0])
     maxRadius_input = int(radius_input[1])
+    
     visible_list = st.sidebar.radio('Show Circle Outlines', ["True", "False"])
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
@@ -153,9 +154,9 @@ def main():
     # Image Adjustments 
     image = original_image.copy()
     image = sharpen_img(image, amount=sharpen_input)
-    #gamma = apply_gamma(image, amount=gamma_input)
+    gamma = apply_gamma(image, amount=gamma_input)
     
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
     thresh = gamma_threshold(gray, value=thresh_input)
 
