@@ -95,7 +95,7 @@ def main():
 
 
     # Filter Tools
-    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 3)
+    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 5)
 
     # Model Tuning
     #dp_list = list(np.arange(.025, 5, .01))
