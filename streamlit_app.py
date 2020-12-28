@@ -203,43 +203,19 @@ def main():
     #cimg = cv2.cvtColor(gray, cv2.COLOR_BGR2RGB)
 
     shape_size = 10
-
     
-    
-    
-    
-    if visible_list is "Yes":
-      for (x, y, r) in circles[0, :]:
-          x = round(x)#.astype(int)
-          y = round(y)#.astype(int)
-
-          # Mark the center of the circle
-          if r <= min_threshold:
-              cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
-
-          # Mark circle outlines
-          cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
-
-          # Show overall metric summary 
-          cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
-          cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
-
-
-      fig = px.imshow(original_image)
-      fig.update_layout(title='Outcome Image', autosize=False, 
-                        width=650,
-                        height=500,
-                        yaxis={'visible': False, 'showticklabels': False},
-                        xaxis={'visible': False, 'showticklabels': False})
-      st.plotly_chart(fig)
-    else:
-        x = round(x).astype(int)
-        y = round(y).astype(int)
+    for (x, y, r) in circles[0, :]:
+        x = round(x)#.astype(int)
+        y = round(y)#.astype(int)
 
         # Mark the center of the circle
         if r <= min_threshold:
             cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
             
+        if visible_list is "Yes":
+          # Mark circle outlines
+          cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
+
         # Show overall metric summary 
         cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
         cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
@@ -252,7 +228,6 @@ def main():
                       yaxis={'visible': False, 'showticklabels': False},
                       xaxis={'visible': False, 'showticklabels': False})
     st.plotly_chart(fig)
-      
-    
+
 
 main()
