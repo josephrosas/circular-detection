@@ -153,9 +153,9 @@ def main():
     # Image Adjustments 
     image = original_image.copy()
     image = sharpen_img(image, amount=sharpen_input)
-    gamma = apply_gamma(image, amount=gamma_input) 
+    #gamma = apply_gamma(image, amount=gamma_input)
     
-    gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     thresh = gamma_threshold(gray, value=thresh_input)
 
