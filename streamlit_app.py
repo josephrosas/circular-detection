@@ -99,7 +99,7 @@ def main():
                                         min_value=.00, 
                                         max_value=1.00, 
                                         step=0.01, 
-                                        value=0.10
+                                        value=0.30
                                     )
 
     # Model Tuning
