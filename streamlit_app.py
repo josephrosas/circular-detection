@@ -190,24 +190,28 @@ def main():
     big_circles = len([i for i in circle_radius if i > max_threshold])
 
     shape_size = 10
+    
+    marked_img = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
+    marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
+    
     for (x, y, r) in circles[0, :]:
         x = round(x)#.astype(int)
         y = round(y)#.astype(int)
 
         # Mark the center of the circle
         if r <= min_threshold:
-            cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
+            cv2.rectangle(marked_img, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
             
         if visible_list is "True":
           # Mark circle outlines
-          cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
+          cv2.circle(marked_img, (x, y), int(r), (0, 255, 0), 2)
 
         # Show overall metric summary 
-        cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
-        cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+        cv2.putText(marked_img, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+        cv2.putText(marked_img, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
 
 
-    fig = px.imshow(original_image)
+    fig = px.imshow(marked_img)
     fig.update_layout(title='Outcome Image', autosize=False, 
                       width=650,
                       height=500,
