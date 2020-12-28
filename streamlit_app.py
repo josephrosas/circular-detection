@@ -98,7 +98,17 @@ def main():
 
     # Filter Tools
     sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 5)
-    gamma_input = st.sidebar.number_input('Gamma Image', 0, 15, 2)
+    #threshold_input = st.sidebar.number_input('Threshold Image', 0, 15, 2)
+    
+    dp_list = list(np.arange(.025, 5, .01))
+    dp_list = [ '%.2f' % elem for elem in dp_list ]
+
+    threshold_input = st.sidebar.number_input(label='Threshold Image', 
+                                        min_value=.05, 
+                                        max_value=5.0, 
+                                        step=0.01, 
+                                        value=1.20
+                                    )
 
     # Model Tuning
     #dp_list = list(np.arange(.025, 5, .01))
@@ -156,10 +166,9 @@ def main():
 
     # Image Adjustments 
     image = sharpen_img(image, amount=sharpen_input)
-    gamma = apply_gamma(image, amount=gamma_input)
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
-    gray = gamma_threshold(gray, value=0.20)
+    gray = gamma_threshold(gray, value=threshold_input)
 
     # Circle Detecting Parameters
     circles = get_circles(gray,
