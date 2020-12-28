@@ -233,8 +233,8 @@ def main():
                         xaxis={'visible': False, 'showticklabels': False})
       st.plotly_chart(fig)
     else:
-        x = round(x)#.astype(int)
-        y = round(y)#.astype(int)
+        x = round(x).astype(int)
+        y = round(y).astype(int)
 
         # Mark the center of the circle
         if r <= min_threshold:
