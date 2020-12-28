@@ -44,7 +44,14 @@ def apply_gamma(image, amount=1.5):
             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
     return adjusted
-
+  
+def gamma_threshold(image, value=0.25):
+  # threshold to a specific % of the maximum
+  threshold = value * np.max(image)
+  image[image <= threshold] = 0
+  kernel = np.ones((5,5),np.uint8)
+  image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+  return image
 
 def get_circles(img, dp1, p1, p2, minr, maxr):
 
@@ -151,8 +158,10 @@ def main():
 
     # Image Adjustments 
     image = sharpen_img(image, amount=sharpen_input)
-
+    gamma = apply_gamma(image, amount=5)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    gray = gamma_threshold(gray, value=0.30)
 
     # Circle Detecting Parameters
     circles = get_circles(gray,
