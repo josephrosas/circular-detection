@@ -191,7 +191,7 @@ def main():
 
     shape_size = 10
     
-    marked_img = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
+    marked_img = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
     marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
     
     for (x, y, r) in circles[0, :]:
