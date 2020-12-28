@@ -132,8 +132,8 @@ def main():
 
     radius_input = st.sidebar.slider(label='Min - Max Radius', 
                                         min_value=0, 
-                                        max_value=15, 
-                                        value=(1, 8), 
+                                        max_value=10, 
+                                        value=(1, 7), 
                                         step=1
                                     )
 
@@ -204,18 +204,42 @@ def main():
 
     shape_size = 10
 
-    for (x, y, r) in circles[0, :]:
-        
+    
+    
+    
+    
+    if visible_list = "Yes":
+      for (x, y, r) in circles[0, :]:
+          x = round(x)#.astype(int)
+          y = round(y)#.astype(int)
+
+          # Mark the center of the circle
+          if r <= min_threshold:
+              cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
+
+          # Mark circle outlines
+          cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
+
+          # Show overall metric summary 
+          cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+          cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
+
+
+      fig = px.imshow(original_image)
+      fig.update_layout(title='Outcome Image', autosize=False, 
+                        width=650,
+                        height=500,
+                        yaxis={'visible': False, 'showticklabels': False},
+                        xaxis={'visible': False, 'showticklabels': False})
+      st.plotly_chart(fig)
+    else:
         x = round(x)#.astype(int)
         y = round(y)#.astype(int)
-        
+
         # Mark the center of the circle
         if r <= min_threshold:
             cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
-        
-        # Mark circle outlines
-        cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
-        
+            
         # Show overall metric summary 
         cv2.putText(original_image, 'Circles Count = ' + str(circle_count), (40, 50), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
         cv2.putText(original_image, 'Potentially "Smaller" Circles = ' + str(small_circles), (40, 80), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 0, 0), 1)
@@ -228,6 +252,7 @@ def main():
                       yaxis={'visible': False, 'showticklabels': False},
                       xaxis={'visible': False, 'showticklabels': False})
     st.plotly_chart(fig)
+      
     
 
 main()
