@@ -99,39 +99,39 @@ def main():
 
 
     # Model Tuning
-    dp_list = list(np.arange(.025, 5, .01))
-    dp_list = [ '%.2f' % elem for elem in dp_list ]
+    #dp_list = list(np.arange(.025, 5, .01))
+    #dp_list = [ '%.2f' % elem for elem in dp_list ]
 
-    dp1_input = st.sidebar.number_input(label='Accumulator Resolution', 
-                                        min_value=.05, 
-                                        max_value=5.0, 
-                                        step=0.01, 
-                                        value=1.20
-                                    )
+    #dp1_input = st.sidebar.number_input(label='Accumulator Resolution', 
+    #                                    min_value=.05, 
+    #                                    max_value=5.0, 
+    #                                    step=0.01, 
+    #                                    value=1.20
+    #                                )
 
-    p1_input = st.sidebar.number_input('Edge Detection', 
-                                        min_value=1, 
-                                        max_value=1000, 
-                                        step=25, 
-                                        value=400
-                                    )
+    #p1_input = st.sidebar.number_input('Edge Detection', 
+    #                                    min_value=1, 
+    #                                    max_value=1000, 
+    #                                    step=25, 
+    #                                    value=400
+    #                                )
 
-    p2_input = st.sidebar.number_input(label='Circle Detection Threshold', 
-                                        min_value=0, 
-                                        max_value=20, 
-                                        step=1, 
-                                        value=10
-                                    )
+    #p2_input = st.sidebar.number_input(label='Circle Detection Threshold', 
+    #                                    min_value=0, 
+    #                                    max_value=20, 
+    #                                    step=1, 
+    #                                    value=10
+    #                                )
 
-    radius_input = st.sidebar.slider(label='Min - Max Radius', 
-                                        min_value=0, 
-                                        max_value=15, 
-                                        value=(1, 8), 
-                                        step=1
-                                    )
+    #radius_input = st.sidebar.slider(label='Min - Max Radius', 
+    #                                    min_value=0, 
+    #                                    max_value=15, 
+    #                                    value=(1, 8), 
+    #                                    step=1
+    #                                )
 
-    minRadius_input = int(radius_input[0])
-    maxRadius_input = int(radius_input[1])
+    #minRadius_input = int(radius_input[0])
+    #maxRadius_input = int(radius_input[1])
 
 
     #if st.sidebar.button("Show Options"):
@@ -165,11 +165,11 @@ def main():
 
     # Circle Detecting Parameters
     circles = get_circles(gray,
-                          dp1_input,
-                          p1_input, 
-                          p2_input, 
-                          minRadius_input, 
-                          maxRadius_input)
+                          1.20, #dp1_input,
+                          400, #p1_input, 
+                          10, #p2_input, 
+                          1, #minRadius_input, 
+                          8) #maxRadius_input)
 
     # Circle Shape Calculations 
     circle_radius = circles[0, :, 2]  # Extract Radius Per Circle
