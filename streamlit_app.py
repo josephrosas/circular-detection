@@ -139,6 +139,7 @@ def main():
 
     minRadius_input = int(radius_input[0])
     maxRadius_input = int(radius_input[1])
+    st.selectbox('Visible', [1,2,3])
 
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
