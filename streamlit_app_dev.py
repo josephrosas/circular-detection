@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 from cv2 import cv2
 import math
 import statistics
@@ -24,13 +22,14 @@ def sharpen_img(
     amount=1.00,
     threshold=0,
     ):
-    """Return a sharpened version of the image, using an unsharp mask."""
 
+    """Return a sharpened version of the image, using an unsharp mask."""
     blurred = cv2.GaussianBlur(image, kernel_size, sigma)
     sharpened = float(amount + 1) * image - float(amount) * blurred
     sharpened = np.maximum(sharpened, np.zeros(sharpened.shape))
     sharpened = np.minimum(sharpened, 255 * np.ones(sharpened.shape))
     sharpened = sharpened.round().astype(np.uint8)
+
     if threshold > 0:
         low_contrast_mask = np.absolute(image - blurred) < threshold
         np.copyto(sharpened, image, where=low_contrast_mask)
@@ -40,13 +39,12 @@ def sharpen_img(
 def adjust_gamma(image, gamma=1.00):
   """
   Build a lookup table mapping the pixel values [0, 255] to
-  their adjusted gamma values
-  """
-    invGamma = 1.00 / gamma
-    table = np.array([(i / 255.0) ** invGamma * 255 for i in
-                        np.arange(0, 256)]).astype('uint8')
+  their adjusted gamma values"""
+  invGamma = 1.00 / gamma
+  table = np.array([(i / 255.0) ** invGamma * 255 for i in
+                    np.arange(0, 256)]).astype('uint8')
   # apply gamma correction using the lookup table
-    return cv2.LUT(image, table)
+  return cv2.LUT(image, table)
 
 
 def apply_gamma(image, amount=1.5):
