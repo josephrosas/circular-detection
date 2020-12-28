@@ -97,8 +97,17 @@ def main():
 
 
     # Filter Tools
-    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 5)
-    #threshold_input = st.sidebar.number_input('Threshold Image', 0, 15, 2)
+    sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 3)
+    
+    dp_list = list(np.arange(.025, 5, .01))
+    dp_list = [ '%.2f' % elem for elem in dp_list ]
+
+    thresh_input = st.sidebar.number_input(label='Accumulator Resolution', 
+                                        min_value=.0, 
+                                        max_value=1.0, 
+                                        step=0.01, 
+                                        value=0.30
+                                    )
 
     # Model Tuning
     #dp_list = list(np.arange(.025, 5, .01))
@@ -160,7 +169,7 @@ def main():
     
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
-    thresh = gamma_threshold(gray, value=.40)
+    thresh = gamma_threshold(gray, value=thresh_input)
     
     
 
