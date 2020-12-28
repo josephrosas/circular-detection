@@ -191,9 +191,10 @@ def main():
 
     shape_size = 10
     
-    marked_img = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
-    marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
-    
+    #marked_img = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
+    #marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
+    marked_img = original_image.copy()
+
     for (x, y, r) in circles[0, :]:
         x = round(x)#.astype(int)
         y = round(y)#.astype(int)
