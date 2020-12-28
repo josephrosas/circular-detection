@@ -133,7 +133,7 @@ def main():
     radius_input = st.sidebar.slider(label='Min - Max Radius', 
                                         min_value=0, 
                                         max_value=10, 
-                                        value=(1, 7), 
+                                        value=(1, 8), 
                                         step=1
                                     )
 
