@@ -101,7 +101,7 @@ def main():
     thresh_input = st.sidebar.number_input(label='Accumulator Resolution', 
                                         min_value=.00, 
                                         max_value=1.00, 
-                                        step=0..01, 
+                                        step=0.01, 
                                         value=0.30
                                     )
 
