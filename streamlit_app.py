@@ -208,7 +208,7 @@ def main():
     
     
     
-    if visible_list = "Yes":
+    if visible_list is "Yes":
       for (x, y, r) in circles[0, :]:
           x = round(x)#.astype(int)
           y = round(y)#.astype(int)
