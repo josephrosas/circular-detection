@@ -156,7 +156,7 @@ def main():
 
     # Image Adjustments 
     image = sharpen_img(image, amount=sharpen_input)
-    gamma = apply_gamma(image, value=3) 
+    gamma = apply_gamma(image, amount=3) 
     
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
