@@ -3,6 +3,8 @@ import math
 import statistics
 import numpy as np
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objects as go
 
 from PIL import Image
 
@@ -96,6 +98,7 @@ def main():
 
     # Filter Tools
     sharpen_input = st.sidebar.number_input('Sharpen Image', 0, 15, 5)
+    gamma_input = st.sidebar.number_input('Gamma Image', 0, 15, 2)
 
     # Model Tuning
     #dp_list = list(np.arange(.025, 5, .01))
@@ -142,10 +145,6 @@ def main():
 
     image = cv2.imdecode(file_bytes, 1)
 
-
-    import plotly.express as px
-    import plotly.graph_objects as go
-
     fig = px.imshow(image)
     fig.update_layout(title='Uploaded Image', autosize=False, 
                       width=650,
@@ -157,7 +156,7 @@ def main():
 
     # Image Adjustments 
     image = sharpen_img(image, amount=sharpen_input)
-    gamma = apply_gamma(image, amount=5)
+    gamma = apply_gamma(image, amount=gamma_input)
     gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
     
     gray = gamma_threshold(gray, value=0.20)
