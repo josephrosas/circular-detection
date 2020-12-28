@@ -90,7 +90,7 @@ def main():
 
 
     # Filter Tools
-    sharpen_input = st.sidebar.number_input('Sharpen', 0, 15, 4)
+    sharpen_input = st.sidebar.number_input('Sharpen', 0, 15, 5)
     gamma_input = st.sidebar.number_input('Brightness', 0, 15, 5)
     
     dp_list = list(np.arange(.00, 1.00, 0.01))
@@ -99,7 +99,7 @@ def main():
                                         min_value=.00, 
                                         max_value=1.00, 
                                         step=0.01, 
-                                        value=0.30
+                                        value=0.50
                                     )
 
     # Model Tuning
@@ -129,7 +129,7 @@ def main():
     radius_input = st.sidebar.slider(label='Min - Max Radius', 
                                         min_value=0, 
                                         max_value=10, 
-                                        value=(1, 8), 
+                                        value=(2, 8), 
                                         step=1
                                     )
 
@@ -179,7 +179,7 @@ def main():
     min_circle_size = min(circle_radius)  # Smallest Circle
     max_circle_size = max(circle_radius)  # Biggest Circle
 
-    stdv_places = 1 # Standard Deviations Away From Average
+    stdv_places = 2 # Standard Deviations Away From Average
 
     stdv = (avg_radius - (stdv_places * standard_deviation))
     
