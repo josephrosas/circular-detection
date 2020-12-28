@@ -212,7 +212,7 @@ def main():
         if r <= min_threshold:
             cv2.rectangle(original_image, (x-shape_size, y+shape_size), (x+shape_size, y-shape_size), (255, 0, 0), 1)
             
-        if visible_list is "Yes":
+        if visible_list is "True":
           # Mark circle outlines
           cv2.circle(original_image, (x, y), int(r), (0, 255, 0), 2)
 
