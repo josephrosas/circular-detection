@@ -1,4 +1,5 @@
 from cv2 import cv2
+import os
 import math
 import statistics
 import numpy as np
@@ -6,14 +7,79 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
+from streamlit.report_thread import get_report_ctx
+from streamlit.server.server import Server
+import streamlit.report_thread as ReportThread
+
 from PIL import Image
 
-#    _____                 _   _                 
-#   |  ___|   _ _ __   ___| |_(_) ___  _ __  ___ 
-#   | |_ | | | | '_ \ / __| __| |/ _ \| '_ \/ __|
-#   |  _|| |_| | | | | (__| |_| | (_) | | | \__ \
-#   |_|   \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
-#                                                
+
+# ------------------------------------------------------- Application Headers
+
+st.title('Detect Circular-Shaped Objects')
+st.markdown('This simple web application detects circular-shaped objects from uploaded images.')
+
+file_types = ['JPG', 'JPEG', 'PNG']
+
+# ----------------------------------------------------------------- Functions
+
+class SessionState(object):
+    def __init__(self, **kwargs):
+        """A new SessionState object.
+
+        Parameters
+        ----------
+        **kwargs : any
+            Default values for the session state.
+
+        Example
+        -------
+        >>> session_state = SessionState(user_name='', favorite_color='black')
+        >>> session_state.user_name = 'Mary'
+        ''
+        >>> session_state.favorite_color
+        'black'
+
+        """
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+@st.cache(allow_output_mutation=True)
+def get_session(id, **kwargs):
+    return SessionState(**kwargs)
+
+def get(**kwargs):
+    """Gets a SessionState object for the current session.
+
+    Creates a new object if necessary.
+
+    Parameters
+    ----------
+    **kwargs : any
+        Default values you want to add to the session state, if we're creating a
+        new one.
+
+    Example
+    -------
+    >>> session_state = get(user_name='', favorite_color='black')
+    >>> session_state.user_name
+    ''
+    >>> session_state.user_name = 'Mary'
+    >>> session_state.favorite_color
+    'black'
+
+    Since you set user_name above, next time your script runs this will be the
+    result:
+    >>> session_state = get(user_name='', favorite_color='black')
+    >>> session_state.user_name
+    'Mary'
+
+    """
+    ctx = get_report_ctx()
+    id = ctx.session_id
+    return get_session(id, **kwargs)
+
+# ---------------------------------------------------------- Sharpen Function
 
 def sharpen_img(
     image,
@@ -21,8 +87,7 @@ def sharpen_img(
     sigma=1.00,
     amount=1.00,
     threshold=0,
-    ):
-
+):
     """Return a sharpened version of the image, using an unsharp mask."""
     blurred = cv2.GaussianBlur(image, kernel_size, sigma)
     sharpened = float(amount + 1) * image - float(amount) * blurred
@@ -34,41 +99,8 @@ def sharpen_img(
         low_contrast_mask = np.absolute(image - blurred) < threshold
         np.copyto(sharpened, image, where=low_contrast_mask)
     return sharpened
-
-
-def adjust_gamma(image, gamma=1.00):
-  """
-  Build a lookup table mapping the pixel values [0, 255] to
-  their adjusted gamma values"""
-  invGamma = 1.00 / gamma
-  table = np.array([(i / 255.0) ** invGamma * 255 for i in
-                    np.arange(0, 256)]).astype('uint8')
-  # apply gamma correction using the lookup table
-  return cv2.LUT(image, table)
-
-
-def apply_gamma(image, amount=1.5):
-    """Loop over various values of gamma"""
-    for gamma in np.arange(.00, 3.5, 0.5):
-
-        # ignore when gamma is 1 (there will be no change to the image)
-        if gamma == 1:
-            continue
-
-        # apply gamma correction and show the images
-        gamma = (gamma if gamma > 0 else 0.1)
-        adjusted = adjust_gamma(image, gamma=gamma)
-        cv2.putText(
-            adjusted,
-            'g={}'.format(gamma),
-            (10, 30),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (0, 0, 255),
-            2,
-            )
-    return adjusted
-
+                                      
+# -------------------------------------------------- Gamma Threshold Function
 
 def gamma_threshold(image, value=0.25):
     """Get image threshold to a specific % of the maximum"""
@@ -78,6 +110,43 @@ def gamma_threshold(image, value=0.25):
     image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
     return image
 
+# ----------------------------------------------------- Adjust Gamma Function
+
+def adjust_gamma(image, gamma=1.0):
+    # build a lookup table mapping the pixel values [0, 255] to
+    # their adjusted gamma values
+    invGamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** invGamma) * 255
+        for i in np.arange(0, 256)]).astype("uint8")
+    # apply gamma correction using the lookup table
+    return cv2.LUT(image, table)
+
+# ------------------------------------------------------ Apply Gamma Function
+
+def apply_gamma(image, amount=1.5):
+            # loop over various values of gamma
+    for gamma in np.arange(0.0, 3.5, 0.5):
+        # ignore when gamma is 1 (there will be no change to the image)
+        if gamma == 1:
+            continue
+        # apply gamma correction and show the images
+        gamma = gamma if gamma > 0 else 0.1
+        adjusted = adjust_gamma(image, gamma=gamma)
+        cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+    return adjusted
+    
+# ---------------------------------------------------------------------------
+
+def gamma_threshold(image, value=0.25):
+    """Get image threshold to a specific % of the maximum"""
+    threshold = value * np.max(image)
+    image[image <= threshold] = 0
+    kernel = np.ones((5, 5), np.uint8)
+    image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+    return image
+
+# ------------------------------------------------- Circle Detection Function 
 
 def get_circles(
     img,
@@ -101,51 +170,71 @@ def get_circles(
         )
     return circles
 
+# --------------------------------------------------------- Uploader Function 
 
-# Sidebar Headers
+def st_file_selector(
+    st_placeholder, path=".", label="Please, select a file/folder..."
+):
+    # get base path (directory)
+    base_path = "." if path is None or path is "" else path
+    base_path = (
+        base_path if os.path.isdir(base_path) else os.path.dirname(base_path)
+    )
+    base_path = "." if base_path is None or base_path is "" else base_path
+    # list files in base path directory
+    files = os.listdir(base_path)
+    if base_path is not ".":
+        files.insert(0, "..")
+    files.insert(0, ".")
+    selected_file = st_placeholder.selectbox(
+        label=label, options=files, key=base_path
+    )
+    selected_path = os.path.normpath(os.path.join(base_path, selected_file))
+    if selected_file is ".":
+        return selected_path
+    if os.path.isdir(selected_path):
+        selected_path = st_file_selector(
+            st_placeholder=st_placeholder, path=selected_path, label=label
+        )
+    return selected_path
 
-st.title('Detect Circular-Shaped Objects')
-st.markdown('This simple web application detects circular-shaped objects from uploaded images.'
-            )
-
-st.sidebar.title('Image Adjustments')
-st.sidebar.markdown('If required, adjust images.')
-
-file_types = ['JPG', 'JPEG', 'PNG']
-
-#       _    ____  ____  
-#      / \  |  _ \|  _ \ 
-#     / _ \ | |_) | |_) |
-#    / ___ \|  __/|  __/ 
-#   /_/   \_\_|   |_|    
-#                        
+# --------------------------------------------------------- Main App Function
 
 def main():
 
-#    ___                   _     ___                            
-#   |_ _|_ __  _ __  _   _| |_  |_ _|_ __ ___   __ _  __ _  ___ 
-#    | || '_ \| '_ \| | | | __|  | || '_ ` _ \ / _` |/ _` |/ _ \
-#    | || | | | |_) | |_| | |_   | || | | | | | (_| | (_| |  __/
-#   |___|_| |_| .__/ \__,_|\__| |___|_| |_| |_|\__,_|\__, |\___|
-#             |_|                                    |___/      
+# ----------------------------------------------------------- Uploader Widget 
 
-    file = st.sidebar.file_uploader('Upload file', type=file_types,
-                                    key='1')
+    st.sidebar.markdown('<a href="mailto:      \
+                        hello@streamlit.io">    \
+                        Email Output Image</a>', 
+                        unsafe_allow_html=True)
+
+    st.sidebar.title('Upload File Here')
+
+    file = st.sidebar.file_uploader('', type=file_types)
 
     show_file = st.empty()
 
+# ---------------------------------------------------------------------------
+
     if not file:
-        show_file.info('Please upload a file of type: '
-                       + ', '.join(file_types))
+        show_file.info('See menu to upload a image')
         return
+
+# ---------------------------------------------------------------------------
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
+# ---------------------------------------------------------------------------
+
     original_image = cv2.imdecode(file_bytes, 1)
 
+# ---------------------------------------------------------------------------
+
     fig = px.imshow(original_image)
+
     fig.update_layout(
-        title='Uploaded Image',
+        title='Input Image',
         autosize=False,
         width=650,
         height=500,
@@ -155,139 +244,150 @@ def main():
         
     st.plotly_chart(fig)
 
-#    __  __                     ___        _   _                 
-#   |  \/  | ___ _ __  _   _   / _ \ _ __ | |_(_) ___  _ __  ___ 
-#   | |\/| |/ _ \ '_ \| | | | | | | | '_ \| __| |/ _ \| '_ \/ __|
-#   | |  | |  __/ | | | |_| | | |_| | |_) | |_| | (_) | | | \__ \
-#   |_|  |_|\___|_| |_|\__,_|  \___/| .__/ \__|_|\___/|_| |_|___/
-#                                   |_|                          
+# ------------------------------------------------------- Menu Sidebar Headers 
 
-    sharpen_input = st.sidebar.number_input('Sharpen', 0, 15, 5)
+    st.sidebar.title('Image Adjustments')
+    st.sidebar.markdown('If required, adjust images.')
 
-    gamma_input = st.sidebar.number_input('Brightness', 0, 15, 5)
+# ------------------------------------------------------- Image Default Values 
 
-    dp_list = list(np.arange(.00, 1.00, .01))
-    dp_list = ['%.2f' % elem for elem in dp_list]
+    gamma_default_value = 100
+    sharpen_default_value = 5
+    thresh_default_value = 0.25
+
+# -------------------------------------------------------- Hough Circle Values 
+
+    dp1_default_value = 1.20
+    p1_default_value = 450
+    p2_default_value = 8
+    radius_default_values = (0, 8)
+
+# ------------------------------------------------------------ Sharpen Widget 
+
+    sharpen_input = st.sidebar.number_input('Sharpen', 
+                         0, 15, sharpen_default_value)
+
+# -------------------------------------------------------------- Gamma Widget 
+
+    gamma_input = st.sidebar.number_input('Brightness', 0, 
+                                100, gamma_default_value)
+
+# ---------------------------------------------------------- Threshold Widget
+
     thresh_input = st.sidebar.number_input(label='Denoising',
-            min_value=.00, max_value=1.00, step=.01, value=0.5)
+                               min_value=.00, max_value=1.00, 
+                               step=.01, value=thresh_default_value)
 
-    dp_list = list(np.arange(.025, 5, .01))
-    dp_list = ['%.2f' % elem for elem in dp_list]
+# ---------------------------------------------------------------------------
+
     dp1_input = st.sidebar.number_input(label='Accumulator Resolution',
-            min_value=.05, max_value=5.0, step=.01, value=1.20)
+            min_value=.05, max_value=5.0, step=.01, value=dp1_default_value)
+
+# ---------------------------------------------------------------------------
 
     p1_input = st.sidebar.number_input('Edge Detection', min_value=1,
-            max_value=1000, step=25, value=450)
+            max_value=1000, step=25, value=p1_default_value)
 
-    p2_input = \
-        st.sidebar.number_input(label='Circle Detection Threshold',
+# ---------------------------------------------------------------------------
+
+    p2_input = st.sidebar.number_input(label='Circle Detection Threshold',
                                 min_value=0, max_value=20, step=1,
-                                value=8)
+                                value=p2_default_value)
+
+# ---------------------------------------------------------------------------
 
     radius_input = st.sidebar.slider(label='Min - Max Radius',
-            min_value=0, max_value=10, value=(2, 8), step=1)
+            min_value=0, max_value=15, value=radius_default_values, step=1)
+
     minRadius_input = int(radius_input[0])
     maxRadius_input = int(radius_input[1])
 
-    visible_list = st.sidebar.radio('Show Circle Outlines', ['True',
-                                    'False'])
+# ---------------------------------------------------------------------------
 
-
-#    ___                                 _       _  _           _                        _   
-#   |_ _|_ __ ___   __ _  __ _  ___     / \   __| |(_)_   _ ___| |_ _ __ ___   ___ _ __ | |_ 
-#    | || '_ ` _ \ / _` |/ _` |/ _ \   / _ \ / _` || | | | / __| __| '_ ` _ \ / _ \ '_ \| __|
-#    | || | | | | | (_| | (_| |  __/  / ___ \ (_| || | |_| \__ \ |_| | | | | |  __/ | | | |_ 
-#   |___|_| |_| |_|\__,_|\__, |\___| /_/   \_\__,_|/ |\__,_|___/\__|_| |_| |_|\___|_| |_|\__|
-#                        |___/                   |__/                                        
+    visible_list = st.sidebar.radio('Show Circle Outlines', 
+                                    ['True', 'False'])
+  
+# --------------------------------------------------------------- Image Edits 
 
     image = original_image.copy()
-    image = sharpen_img(image, amount=sharpen_input)
     gamma = apply_gamma(image, amount=gamma_input)
+    thresh = gamma_threshold(gamma, value=thresh_input)
+    sharpen = sharpen_img(thresh, amount=sharpen_input)
+    gray = cv2.cvtColor(sharpen, cv2.COLOR_BGR2GRAY)
 
-    gray = cv2.cvtColor(gamma, cv2.COLOR_BGR2GRAY)
+# ---------------------------------------------------------- Circle Detection 
 
-    thresh = gamma_threshold(gray, value=thresh_input)
+    circles = get_circles(gray, dp1_default_value, 
+                p1_default_value, p2_default_value, 
+                minRadius_input, maxRadius_input)
 
-#    ____       _            _      ____ _          _           
-#   |  _ \  ___| |_ ___  ___| |_   / ___(_)_ __ ___| | ___  ___ 
-#   | | | |/ _ \ __/ _ \/ __| __| | |   | | '__/ __| |/ _ \/ __|
-#   | |_| |  __/ ||  __/ (__| |_  | |___| | | | (__| |  __/\__ \
-#   |____/ \___|\__\___|\___|\__|  \____|_|_|  \___|_|\___||___/
-#                                                               
+# --------------------------------------------------------------- Circle Size 
 
-    circles = get_circles(
-        thresh,
-        dp1_input,
-        p1_input,
-        p2_input,
-        minRadius_input,
-        maxRadius_input,
-        )
-
-#     ____ _          _        ____       _        _ _     
-#    / ___(_)_ __ ___| | ___  |  _ \  ___| |_ __ _(_) |___ 
-#   | |   | | '__/ __| |/ _ \ | | | |/ _ \ __/ _` | | / __|
-#   | |___| | | | (__| |  __/ | |_| |  __/ || (_| | | \__ \
-#    \____|_|_|  \___|_|\___| |____/ \___|\__\__,_|_|_|___/
-#                                                          
-
-    circle_radius = circles[0, :, 2]  # Extract Radius Per Circle
+    circle_radius = circles[0,:,2]  # Extract Radius Per Circle
     circle_count = len(circle_radius)  # Count Detected Circles
+
+# ---------------------------------------------------------------------------
 
     avg_radius = sum(circle_radius) / circle_count  # Overall radius mean
 
+# ---------------------------------------------------------------------------
+
     standard_deviation = statistics.stdev(circle_radius, avg_radius)
+
+# ---------------------------------------------------------------------------
 
     min_circle_size = min(circle_radius)  # Smallest Circle
     max_circle_size = max(circle_radius)  # Biggest Circle
 
-    stdv_places = 2  # Standard Deviations Away From Average
+# ---------------------------------------------------------------------------
 
-    stdv = avg_radius - stdv_places * standard_deviation
+    stdv_places = 5  # Standard Deviations Away From Average
+
+# ---------------------------------------------------------------------------
+
+    stdv = avg_radius - (stdv_places * standard_deviation)
+
+# ---------------------------------------------------------------------------
 
     min_threshold = math.floor(stdv)
     max_threshold = math.ceil(stdv)
 
+# ---------------------------------------------------------------------------
+
     small_circles = len([i for i in circle_radius if i < min_threshold])
     big_circles = len([i for i in circle_radius if i > max_threshold])
 
-    shape_size = 10
+# --------------------------------------------- Small Circle's Label Box Size
 
-#     ____ _          _        __  __            _    _             
-#    / ___(_)_ __ ___| | ___  |  \/  | __ _ _ __| | _(_)_ __   __ _ 
-#   | |   | | '__/ __| |/ _ \ | |\/| |/ _` | '__| |/ / | '_ \ / _` |
-#   | |___| | | | (__| |  __/ | |  | | (_| | |  |   <| | | | | (_| |
-#    \____|_|_|  \___|_|\___| |_|  |_|\__,_|_|  |_|\_\_|_| |_|\__, |
-#                                                             |___/ 
+    shape_size = 8
 
+# ---------------------------------------------------------------------------
     # marked_img = cv2.cvtColor(original_image, cv2.COLOR_GRAY2BGR)
     # marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
+# ---------------------------------------------------------------------------
 
     marked_img = original_image.copy()
+
+# ---------------------------------------------------------------------------
 
     for (x, y, r) in circles[0, :]:
         x = round(x)  # .astype(int)
         y = round(y)  # .astype(int)
 
-        # Mark the center of the circle
+# ---------------------------------------------------------------------------
 
         if r <= min_threshold:
             cv2.rectangle(marked_img, (x - shape_size, y + shape_size),
                           (x + shape_size, y - shape_size), (255, 0,
-                          0), 1)
+                          0), 2)
 
-        if visible_list is 'True':
+# ---------------------------------------------------------------------------
 
+        if visible_list == 'True':
           # Mark circle outlines
-
             cv2.circle(marked_img, (x, y), int(r), (0, 255, 0), 2)
 
-#    _____ _           _ _               ____                                             
-#   |  ___(_)_ __   __| (_)_ __   __ _  / ___| _   _ _ __ ___  _ __ ___   __ _ _ __ _   _ 
-#   | |_  | | '_ \ / _` | | '_ \ / _` | \___ \| | | | '_ ` _ \| '_ ` _ \ / _` | '__| | | |
-#   |  _| | | | | | (_| | | | | | (_| |  ___) | |_| | | | | | | | | | | | (_| | |  | |_| |
-#   |_|   |_|_| |_|\__,_|_|_| |_|\__, | |____/ \__,_|_| |_| |_|_| |_| |_|\__,_|_|   \__, |
-#                                |___/                                              |___/ 
+# -------------------------------------------------------------- Circle Count
 
         cv2.putText(
             marked_img,
@@ -296,8 +396,10 @@ def main():
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             (255, 0, 0),
-            1,
-            )
+            1)
+
+# ------------------------------------------------------- Small Circles Count 
+
         cv2.putText(
             marked_img,
             'Potentially "Smaller" Circles = ' + str(small_circles),
@@ -305,19 +407,22 @@ def main():
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             (255, 0, 0),
-            1,
-            )
+            1)
+
+# ------------------------------------------------------------- Display Image 
 
     fig = px.imshow(marked_img)
+
     fig.update_layout(
         title='Outcome Image',
         autosize=False,
         width=650,
         height=500,
         yaxis={'visible': False, 'showticklabels': False},
-        xaxis={'visible': False, 'showticklabels': False},
-        )
+        xaxis={'visible': False, 'showticklabels': False})
+
     st.plotly_chart(fig)
 
+# ---------------------------------------------------------------------------
 
 main()
