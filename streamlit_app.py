@@ -1,4 +1,3 @@
-from cv2 import cv2
 import os
 import math
 import statistics
@@ -7,12 +6,12 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
+from cv2 import cv2
 from streamlit.report_thread import get_report_ctx
 from streamlit.server.server import Server
 import streamlit.report_thread as ReportThread
 
 from PIL import Image
-
 
 # ------------------------------------------------------- Application Headers
 
@@ -39,7 +38,6 @@ class SessionState(object):
         ''
         >>> session_state.favorite_color
         'black'
-
         """
         for key, val in kwargs.items():
             setattr(self, key, val)
@@ -75,19 +73,14 @@ def get(**kwargs):
     'Mary'
 
     """
+
     ctx = get_report_ctx()
     id = ctx.session_id
     return get_session(id, **kwargs)
 
 # ---------------------------------------------------------- Sharpen Function
 
-def sharpen_img(
-    image,
-    kernel_size=(5, 5),
-    sigma=1.00,
-    amount=1.00,
-    threshold=0,
-):
+def imsharp(image, kernel_size=(5, 5), sigma=1.00, amount=1.00, threshold=0):
     """Return a sharpened version of the image, using an unsharp mask."""
     blurred = cv2.GaussianBlur(image, kernel_size, sigma)
     sharpened = float(amount + 1) * image - float(amount) * blurred
@@ -99,20 +92,24 @@ def sharpen_img(
         low_contrast_mask = np.absolute(image - blurred) < threshold
         np.copyto(sharpened, image, where=low_contrast_mask)
     return sharpened
-                                      
-# -------------------------------------------------- Gamma Threshold Function
 
-def gamma_threshold(image, value=0.25):
-    """Get image threshold to a specific % of the maximum"""
-    threshold = value * np.max(image)
-    image[image <= threshold] = 0
-    kernel = np.ones((5, 5), np.uint8)
-    image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-    return image
+# ---------------------------------------------------------- Crop Input Image 
 
-# ----------------------------------------------------- Adjust Gamma Function
+def imcrop(image, start=20, end=90): 
+    """Crop spaces that do not reflect objects"""
+    # Get height and width
+    height, width = image.shape[:2]
+    # Let's get the starting pixel coordiantes (top  left of cropping rectangle)
+    start_row, start_col = int(height * .20), int(width * .20)
+    # Let's get the ending pixel coordinates (bottom right)
+    end_row, end_col = int(height * .90), int(width * .90)
+    # Simply use indexing to crop out the rectangle we desire
+    cropped = image[start_row:end_row, start_col:end_col]
+    return cropped
 
-def adjust_gamma(image, gamma=1.0):
+# ----------------------------------------------------- Adjust Gamma Function 
+
+def imgamma_adjust(image, gamma=1.0): 
     # build a lookup table mapping the pixel values [0, 255] to
     # their adjusted gamma values
     invGamma = 1.0 / gamma
@@ -121,9 +118,9 @@ def adjust_gamma(image, gamma=1.0):
     # apply gamma correction using the lookup table
     return cv2.LUT(image, table)
 
-# ------------------------------------------------------ Apply Gamma Function
+# ------------------------------------------------------ Apply Gamma Function 
 
-def apply_gamma(image, amount=1.5):
+def imgamma_apply(image, amount=1.5): 
             # loop over various values of gamma
     for gamma in np.arange(0.0, 3.5, 0.5):
         # ignore when gamma is 1 (there will be no change to the image)
@@ -131,14 +128,15 @@ def apply_gamma(image, amount=1.5):
             continue
         # apply gamma correction and show the images
         gamma = gamma if gamma > 0 else 0.1
-        adjusted = adjust_gamma(image, gamma=gamma)
-        cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        adjusted = imgamma_adjust(image, gamma=gamma)
+        #cv2.putText(adjusted, "g={}".format(gamma), (10, 30),
+        #    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
     return adjusted
     
-# ---------------------------------------------------------------------------
+# -------------------------------------------------- Gamma Threshold Function 
 
-def gamma_threshold(image, value=0.25):
+def imgamma_threshold(image, value=0.25): 
     """Get image threshold to a specific % of the maximum"""
     threshold = value * np.max(image)
     image[image <= threshold] = 0
@@ -148,14 +146,7 @@ def gamma_threshold(image, value=0.25):
 
 # ------------------------------------------------- Circle Detection Function 
 
-def get_circles(
-    img,
-    dp1,
-    p1,
-    p2,
-    minr,
-    maxr,
-    ):
+def imcircles(img, dp1, p1, p2, min_radius, max_radius):
     """Circle detection using OpenCV's Hough Gradient"""
     rows = img.shape[0]
     circles = cv2.HoughCircles(
@@ -165,16 +156,13 @@ def get_circles(
         minDist=rows / 65,
         param1=p1,
         param2=p2,
-        minRadius=minr,
-        maxRadius=maxr,
-        )
+        minRadius=min_radius,
+        maxRadius=max_radius)
     return circles
 
 # --------------------------------------------------------- Uploader Function 
 
-def st_file_selector(
-    st_placeholder, path=".", label="Please, select a file/folder..."
-):
+def st_file_selector(st_placeholder, path=".", label="Please, select a file/folder..."):
     # get base path (directory)
     base_path = "." if path is None or path is "" else path
     base_path = (
@@ -204,11 +192,6 @@ def main():
 
 # ----------------------------------------------------------- Uploader Widget 
 
-    st.sidebar.markdown('<a href="mailto:      \
-                        hello@streamlit.io">    \
-                        Email Output Image</a>', 
-                        unsafe_allow_html=True)
-
     st.sidebar.title('Upload File Here')
 
     file = st.sidebar.file_uploader('', type=file_types)
@@ -225,21 +208,23 @@ def main():
 
     file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------- Load Input Image
 
     original_image = cv2.imdecode(file_bytes, 1)
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------- Display Input Image
 
     fig = px.imshow(original_image)
+
+    display_options = {'visible': False, 'showticklabels': False} 
 
     fig.update_layout(
         title='Input Image',
         autosize=False,
         width=650,
         height=500,
-        yaxis={'visible': False, 'showticklabels': False},
-        xaxis={'visible': False, 'showticklabels': False},
+        yaxis=display_options,
+        xaxis=display_options,
         )
         
     st.plotly_chart(fig)
@@ -302,57 +287,57 @@ def main():
     minRadius_input = int(radius_input[0])
     maxRadius_input = int(radius_input[1])
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------ Circle Outline Widget
 
-    visible_list = st.sidebar.radio('Show Circle Outlines', 
-                                    ['True', 'False'])
+    visible_list = st.sidebar.radio('Show Circle Outlines', ['True', 'False'])
   
 # --------------------------------------------------------------- Image Edits 
 
     image = original_image.copy()
-    gamma = apply_gamma(image, amount=gamma_input)
-    thresh = gamma_threshold(gamma, value=thresh_input)
-    sharpen = sharpen_img(thresh, amount=sharpen_input)
+    cropped = imcrop(image, start=20, end=80)
+    gamma = imgamma_apply(cropped, amount=gamma_input)
+    thresh = imgamma_threshold(gamma, value=thresh_input)
+    sharpen = imsharp(thresh, amount=sharpen_input)
     gray = cv2.cvtColor(sharpen, cv2.COLOR_BGR2GRAY)
 
 # ---------------------------------------------------------- Circle Detection 
 
-    circles = get_circles(gray, dp1_default_value, 
+    circles = imcircles(gray, dp1_default_value, 
                 p1_default_value, p2_default_value, 
                 minRadius_input, maxRadius_input)
 
 # --------------------------------------------------------------- Circle Size 
 
-    circle_radius = circles[0,:,2]  # Extract Radius Per Circle
-    circle_count = len(circle_radius)  # Count Detected Circles
+    circle_radius = circles[0,:,2]
+    circle_count = len(circle_radius)
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------- Overall radius mean 
 
-    avg_radius = sum(circle_radius) / circle_count  # Overall radius mean
+    avg_radius = sum(circle_radius) / circle_count  # 
 
-# ---------------------------------------------------------------------------
+# -------------------------------------------------------- Standard Deviation 
 
     standard_deviation = statistics.stdev(circle_radius, avg_radius)
 
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------- Min / Max Circle Size 
 
-    min_circle_size = min(circle_radius)  # Smallest Circle
-    max_circle_size = max(circle_radius)  # Biggest Circle
+    min_circle_size = min(circle_radius)
+    max_circle_size = max(circle_radius)
 
-# ---------------------------------------------------------------------------
+# ------------------------------------- Standard Deviations Away From Average 
 
-    stdv_places = 5  # Standard Deviations Away From Average
+    stdv_places = 5
 
-# ---------------------------------------------------------------------------
+# -------------------------------------------- Standard Deviation Measurement
 
     stdv = avg_radius - (stdv_places * standard_deviation)
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------- Min / Max Threshold 
 
     min_threshold = math.floor(stdv)
     max_threshold = math.ceil(stdv)
 
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------- Min / Max Circle Count 
 
     small_circles = len([i for i in circle_radius if i < min_threshold])
     big_circles = len([i for i in circle_radius if i > max_threshold])
@@ -366,7 +351,7 @@ def main():
     # marked_img = cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)
 # ---------------------------------------------------------------------------
 
-    marked_img = original_image.copy()
+    marked_img = cropped.copy()
 
 # ---------------------------------------------------------------------------
 
@@ -423,6 +408,6 @@ def main():
 
     st.plotly_chart(fig)
 
-# ---------------------------------------------------------------------------
+# ----------------------------------------------------------------------- End
 
 main()
