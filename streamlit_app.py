@@ -377,22 +377,24 @@ def main():
         cv2.putText(
             marked_img,
             'Circles Count = ' + str(circle_count),
-            (40, 50),
+            (20, 285),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             (255, 0, 0),
-            1)
+            2,
+            )
 
 # ------------------------------------------------------- Small Circles Count 
 
         cv2.putText(
             marked_img,
-            'Potentially "Smaller" Circles = ' + str(small_circles),
-            (40, 80),
+            'Potential "Small" Circles = ' + str(small_circles),
+            (20, 310),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             (255, 0, 0),
-            1)
+            2,
+            )
 
 # ------------------------------------------------------------- Display Image 
 
