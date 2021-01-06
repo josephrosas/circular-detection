@@ -164,13 +164,9 @@ def main():
     output = image_png.copy()
     image = image_png.copy()
 
-    im_resize = cv2.resize(image, (500, 500))
-    is_success, im_buf_arr = cv2.imencode(".png", im_resize)
-    byte_im = im_buf_arr.tobytes()
-
     kernel = np.ones((5,5), np.uint8)
     opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-    sharpen = imsharp(opening, amount=3)
+    sharpen = imsharp(opening, amount=4)
     gamma = imgamma_apply(sharpen, amount=100)
     thresh = imgamma_threshold(gamma, value=0.50)
     
