@@ -3,3 +3,4 @@ streamlit
 opencv-python
 plotly
 imutils
+matplotlib
