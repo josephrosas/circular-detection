@@ -6,3 +6,4 @@ imutils
 matplotlib
 scipy
 skimage
+scikit-image
