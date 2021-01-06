@@ -5,3 +5,4 @@ plotly
 imutils
 matplotlib
 scipy
+skimage
