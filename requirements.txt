@@ -4,3 +4,4 @@ opencv-python
 plotly
 imutils
 matplotlib
+scipy
