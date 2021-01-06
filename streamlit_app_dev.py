@@ -20,8 +20,6 @@ import streamlit.report_thread as ReportThread
 from PIL import Image
 from io import BytesIO
 from scipy import ndimage
-#from skimage.feature import peak_local_max
-#from skimage.segmentation import watershed
 
 # ---------------------------------------------------------------------------------------- HEADERS
 
@@ -159,8 +157,12 @@ def main():
 # ---------------------------------------------------------------------------------------- IMAGE ADJUSTMENTS
 
     # Create mask image by copying original
-    output = original_image.copy()
-    image = original_image.copy()
+
+    cv2.imwrite("image.png", original_image)
+    image_png = cv2.imread("contor.png")
+    
+    output = image_png.copy()
+    image = image_png.copy()
 
     im_resize = cv2.resize(image, (500, 500))
     is_success, im_buf_arr = cv2.imencode(".png", im_resize)
