@@ -23,10 +23,10 @@ from scipy import ndimage
 
 # ---------------------------------------------------------------------------------------- HEADERS
 
-st.markdown("<h1 style='text-align: center; color:blue'>DEVELOPMENT ONLY</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color:red'>DEVELOPMENT ONLY</h1>", unsafe_allow_html=True)
 st.markdown("<h1 style='text-align: center;'>Detect Circular-Shaped Objects</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>Simple web app to detect circular-shaped objects from images.</h4>", unsafe_allow_html=True)
-st.markdown("<h1 style='text-align: center;'>DEVELOPMENT ONLY</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color:red'>DEVELOPMENT ONLY</h1>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------------------- UPLOADER 
 
