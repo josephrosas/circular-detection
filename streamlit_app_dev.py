@@ -159,7 +159,7 @@ def main():
     # Create mask image by copying original
 
     cv2.imwrite("image.png", original_image)
-    image_png = cv2.imread("contor.png")
+    image_png = cv2.imread("image.png")
     
     output = image_png.copy()
     image = image_png.copy()
