@@ -26,6 +26,8 @@ from scipy import ndimage
 st.markdown("<h1 style='text-align: center;'>Detect Circular-Shaped Objects</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>Simple web app to detect circular-shaped objects from images.</h4>", unsafe_allow_html=True)
 
+st.sidebar.header('Detection Adjustments')
+
 # ---------------------------------------------------------------------------------------- UPLOADER 
 
 def file_selector(st_placeholder, path=".", label="Please, select a file/folder..."):
@@ -140,6 +142,8 @@ def find_circles(image, dp=1.2, param1=300, param2=15, minRadius=0, maxRadius=9,
 def main():
     """ Main Application """
 
+    detection_type = st.sidebar.selectbox('Detection Type', ['32W', '333'])
+
     file = st.file_uploader('', type=['JPG', 'JPEG', 'PNG'])
 
     show_file = st.empty()
@@ -154,42 +158,86 @@ def main():
 
     original_image = cv2.imdecode(file_bytes, 1)
 
-# ---------------------------------------------------------------------------------------- IMAGE ADJUSTMENTS
 
-    # Create mask image by copying original
+    # ---------------------------------------------------------------------------------------- 32W IMAGE ADJUSTMENTS
 
-    cv2.imwrite("image.png", original_image)
-    image_png = cv2.imread("image.png")
-    
-    output = image_png.copy()
-    image = image_png.copy()
+    if detection_type == '32W':
 
-    kernel = np.ones((5,5), np.uint8)
-    opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-    sharpen = imsharp(opening, amount=4)
-    gamma = imgamma_apply(sharpen, amount=100)
-    thresh = imgamma_threshold(gamma, value=0.50)
-    
-    # Convert Image To Grayscale
-    gray = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
+        # Create mask image by copying original
 
-    # Find Image Row Count
-    rows = gray.shape[0]
-
-    # Define DPI (Dots Per Inch) Value
-    dpi=42
-
-    # Get Detected Circles
-    circles = find_circles(
+        cv2.imwrite("image.png", original_image)
+        image_png = cv2.imread("image.png")
         
-                           gray, 
-                           dp=1.3, 
-                           param1=450, 
-                           param2=7, 
-                           minRadius=1, 
-                           maxRadius=9, 
-                           dpi=42       
-                    )
+        output = image_png.copy()
+        image = image_png.copy()
+
+        kernel = np.ones((5,5), np.uint8)
+        opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+        sharpen = imsharp(opening, amount=4)
+        gamma = imgamma_apply(sharpen, amount=100)
+        thresh = imgamma_threshold(gamma, value=0.50)
+        
+        # Convert Image To Grayscale
+        gray = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
+
+        # Find Image Row Count
+        rows = gray.shape[0]
+
+        # Define DPI (Dots Per Inch) Value
+        dpi=42
+
+        # Get Detected Circles
+        circles = find_circles(
+            
+                            gray, 
+                            dp=1.3, 
+                            param1=450, 
+                            param2=7, 
+                            minRadius=1, 
+                            maxRadius=9, 
+                            dpi=42       
+                        )
+
+    # ---------------------------------------------------------------------------------------- 333 IMAGE ADJUSTMENTS
+    
+    if detection_type == '333':
+
+        # Create mask image by copying original
+
+        cv2.imwrite("image.png", original_image)
+        image_png = cv2.imread("image.png")
+        
+        output = image_png.copy()
+        image = image_png.copy()
+
+        ker_num = 7
+
+        kernel = np.ones((ker_num,ker_num), np.uint8)
+        opening = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+        sharpen = imsharp(opening, amount=7)
+        gamma = imgamma_apply(sharpen, amount=75)
+        thresh = imgamma_threshold(gamma, value=0.50)
+        
+        # Convert Image To Grayscale
+        gray = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
+
+        # Find Image Row Count
+        rows = gray.shape[0]
+
+        # Define DPI (Dots Per Inch) Value
+        dpi=55
+
+        # Get Detected Circles
+        circles = find_circles(
+            
+                            gray, 
+                            dp=1.3, 
+                            param1=450, 
+                            param2=7, 
+                            minRadius=1, 
+                            maxRadius=6, 
+                            dpi=60       
+                        )
 
 # ---------------------------------------------------------------------------------------- CIRCLE CALCULATION
 
